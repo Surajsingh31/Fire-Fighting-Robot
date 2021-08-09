@@ -1,0 +1,110 @@
+/*------ Arduino Fire Fighting Robot Code----- */
+ 
+#include <Servo.h>
+Servo myservo;
+ 
+int pos = 0;    
+boolean fire = false;
+ 
+/*-------defining Inputs------*/
+#define Left_Sensor 9      // left sensor
+#define Right_Sensor 10      // right sensor
+#define Forward_Sensor 8 //forward sensor
+ 
+/*-------defining Outputs------*/
+#define LeftMotor1 2       // left motor
+#define LeftMotor2 3       // left motor
+#define RightMotor1 4       // right motor
+#define RightMotor2 5       // right motor
+#define pump 6
+ 
+void setup()
+{
+  pinMode(Left_Sensor, INPUT);
+  pinMode(Right_Sensor, INPUT);
+  pinMode(Forward_Sensor, INPUT);
+  pinMode(LeftMotor1, OUTPUT);
+  pinMode(LeftMotor2, OUTPUT);
+  pinMode(RightMotor1, OUTPUT);
+  pinMode(RightMotor2, OUTPUT);
+  pinMode(pump, OUTPUT);
+ 
+  myservo.attach(11);
+  myservo.write(90); 
+}
+ 
+void extinguish_fire()
+{
+    delay (500);
+ 
+    digitalWrite(LeftMotor1, HIGH);
+    digitalWrite(LeftMotor2, HIGH);
+    digitalWrite(RightMotor1, HIGH);
+    digitalWrite(RightMotor2, HIGH);
+    
+   digitalWrite(pump, HIGH); 
+   delay(500);
+    
+    for (pos = 50; pos <= 130; pos++) { 
+    myservo.write(pos); 
+    delay(10);  
+  }
+  for (pos = 130; pos >= 50; pos--) { 
+    myservo.write(pos); 
+    delay(10);
+  }
+  
+  digitalWrite(pump,LOW);
+  myservo.write(90);
+  
+  fire=false;
+}
+ 
+void loop()
+{
+   myservo.write(90); 
+ 
+    if (digitalRead(Left_Sensor)==1 && digitalRead(Right_Sensor)==1 && digitalRead(Forward_Sensor)==1) //If Fire not detected all sensors are zero
+    {
+    //Do not move the robot
+    digitalWrite(LeftMotor1, HIGH);
+    digitalWrite(LeftMotor2, HIGH);
+    digitalWrite(RightMotor1, HIGH);
+    digitalWrite(RightMotor2, HIGH);
+    }
+    
+    else if (digitalRead(Forward_Sensor)==0) //If Fire is straight ahead
+    {
+    //Move the robot forward
+    digitalWrite(LeftMotor1, HIGH);
+    digitalWrite(LeftMotor2, LOW);
+    digitalWrite(RightMotor1, HIGH);
+    digitalWrite(RightMotor2, LOW);
+    fire = true;
+    }
+    
+    else if (digitalRead(Left_Sensor)==0) //If Fire is to the left
+    {
+    //Move the robot left
+    digitalWrite(LeftMotor1, HIGH);
+    digitalWrite(LeftMotor2, LOW);
+    digitalWrite(RightMotor1, HIGH);
+    digitalWrite(RightMotor2, HIGH);
+    }
+    
+    else if (digitalRead(Right_Sensor)==0) //If Fire is to the right
+    {
+    //Move the robot right
+    digitalWrite(LeftMotor1, HIGH);
+    digitalWrite(LeftMotor2, HIGH);
+    digitalWrite(RightMotor1, HIGH);
+    digitalWrite(RightMotor2, LOW);
+    }
+    
+    delay(300); //Slow down the speed of robot
+ 
+     while (fire == true)
+     {
+      extinguish_fire();
+     }
+}
